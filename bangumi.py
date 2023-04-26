@@ -1,4 +1,8 @@
 
 import dlSource
 
-dlSource.doTest()
+#dlSource.doTest()
+lst = dlSource.getList()
+
+for item in lst[:5]:
+    print(item)

@@ -7,5 +7,6 @@
 
  - python3
    - pywebio
-   - rss-parser
+   - not required: rss-parser, directly using beautifulsoup is better
+   - ostruct
 
