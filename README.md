@@ -9,4 +9,7 @@
    - pywebio
    - not required: rss-parser, directly using beautifulsoup is better
    - ostruct
+   - qbittorrent-api
+   - humanize
+   
 
