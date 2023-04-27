@@ -47,7 +47,7 @@ class Downloader:
     def logout(self):
         self.client.auth_log_out()
 
-    def del_download(self, url):
+    def download(self, url):
         self.connect()
         print("download: ", url)
         res = self.client.torrents_add(urls=[url], category='acg',
@@ -56,7 +56,7 @@ class Downloader:
             print("add torrent failed. ", res)
         self.logout()
 
-    def download(self, url):
+    def test_download(self, url):
         print("download: ", url)
         cfg = self.cfg
         client = qbit.Client(**cfg)

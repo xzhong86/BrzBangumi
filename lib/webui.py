@@ -1,6 +1,7 @@
 
 from downloader import Downloader
 from humanize import naturalsize
+import trackers
 
 import pywebio
 from pywebio.output import *
@@ -17,7 +18,8 @@ class WebUI:
     def doDownload(self, info):
         print("download for ", info.title)
         toast("Download " + info.title)  # message
-        self.dl.download(info.download.url)
+        link = trackers.getMagnet(info.hashid)
+        self.dl.download(link)
 
 
     def dlPage(self):

@@ -8,6 +8,7 @@ import hashlib
 import time
 import bs4
 import os
+import re
 
 UseCache = True
 CacheDir = "./cache/"
@@ -78,6 +79,18 @@ def strToTime(dstr):
     return time.time()
 
 
+def findHashId(info, item):
+    regex = re.compile('([0-9a-f]{32,})')
+    def getid(url, regex=regex):
+        m = regex.search(url)
+        return m and m[1]
+    res = None
+    if (info.download):
+        res = getid(info.download.url)
+    if (not res and item.link):
+        res = getid(item.link)
+    return res
+
 def getDlListUrl(url):
     rss = getRss(url)
     lst = []
@@ -96,6 +109,8 @@ def getDlListUrl(url):
             dl.url    = enclosure.get('url')
             info.download = dl
             lst.append(info)
+
+        info.hashid = findHashId(info, item)
 
     return lst
 
