@@ -10,6 +10,8 @@ import bs4
 import os
 import re
 
+import trackers
+
 UseCache = True
 CacheDir = "./cache/"
 Debug = False
@@ -111,6 +113,7 @@ def getDlListUrl(url):
             lst.append(info)
 
         info.hashid = findHashId(info, item)
+        info.magnet = trackers.getMagnet(info.hashid, 'mikan')
 
     return lst
 
