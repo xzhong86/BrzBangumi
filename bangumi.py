@@ -10,6 +10,6 @@ lst = dlSource.getList()
 
 ui = webui.WebUI()
 ui.setDlList(lst)
-#ui.start(cfg=dict(port=None))
-ui.test(cfg=dict(port=None))
+ui.start(cfg=dict(port=None))
+#ui.test(cfg=dict(port=None))
 
