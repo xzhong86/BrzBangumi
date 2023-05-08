@@ -21,17 +21,22 @@ class Downloader:
         cfg = DefaultConf.copy()
         if (conf):
             cfg.update(conf)
-        self.client = qbit.Client(**cfg)
+        self.no_connect = True
         self.cfg    = cfg
+        if self.no_connect:
+            return
+        print("create qbitorrent client")
+        self.client = qbit.Client(**cfg)
         self.connect()
         self.showVersion()
         self.logout()
 
     def connect(self):
-        if (self.client.is_logged_in):
+        if (self.no_connect or self.client.is_logged_in):
             return
 
         try:
+            print("connect to qbitorrent ...")
             self.client.auth_log_in(username=self.cfg.get('username'),
                                     password=self.cfg.get('password'))
             return True
@@ -48,8 +53,11 @@ class Downloader:
         self.client.auth_log_out()
 
     def download(self, url):
-        self.connect()
         print("download: ", url)
+        if self.no_connect:
+            return
+
+        self.connect()
         res = self.client.torrents_add(urls=[url], category='acg',
                                        save_path='/data/share/qbittorrent/')
         if (res != "Ok."):

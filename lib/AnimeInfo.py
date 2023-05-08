@@ -24,7 +24,7 @@ class AnimeInfo:
             fh = open(self.datafile)
             self.data = json.load(fh)
         elif use_test:
-            self.data = yaml.load(open("data/test-data.yaml"))
+            self.data = yaml.load(open("data/test-data.yaml"), yaml.FullLoader)
         else:
             self.data = dict(season = self.curr_season, list = [])
 

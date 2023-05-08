@@ -51,7 +51,7 @@ class AniPage:
                         put_text(','.join(kws))
                     ], size="1fr 4fr")
                 ]),
-                put_button("Edit", onclick=lambda: toast("edit")).style("center")
+                put_button("Edit", onclick=lambda: toast("edit")).style("margin: auto")
             ]).style(item_style)
 
 
