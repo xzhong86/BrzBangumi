@@ -10,6 +10,11 @@
    - qbittorrent-api
    - bs4 (beautifulsoup4), lxml
    - ostruct, humanize, pyyaml
+   
+ - BTW, we can get a requirements file in two ways:
+   - `pipreqs . --encoding utf8`: generate with pipreqs tool
+   - `pip freeze > requirements.txt`: use pip command, but you'd better run it in python venv
+
 
 ### Setup Env
 
