@@ -2,7 +2,7 @@
 import sys
 import pywebio
 from views import home as vhome
-
+from utils import anime
 
 def main():
     vhome.view()
@@ -12,4 +12,5 @@ try:
 
 except KeyboardInterrupt:
     print("User Interrupt, exit.")
+    anime.getManager().saveData()
     sys.exit(0)

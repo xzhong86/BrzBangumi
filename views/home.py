@@ -9,22 +9,27 @@ from pywebio.session import local as web_local
 from functools import partial
 #from more_itertools import batched
 
+from utils import anime
+
+glb_ani_man = None
+
 def view():
     pywebio.session.set_env(output_max_width="80%")
 
     put_column([put_scope("menu"), None, put_scope("main")],
                size="1fr 0.3fr 13fr")
 
+    global glb_ani_man
+    glb_ani_man = anime.getManager()
     home_page()
-
-glb_anime_list = []
 
 @use_scope("main", clear=True)
 def home_page():
     put_row([
         put_button("Add", onclick=show_add_anime)
     ])
-    ani_items = [ put_anime_brief(ani) for ani in glb_anime_list ]
+    anime_list = glb_ani_man.animes
+    ani_items = [ put_anime_brief(ani) for ani in anime_list ]
     put_column(ani_items)
 
 def put_anime_brief(ani):
@@ -41,13 +46,8 @@ def show_add_anime():
 
 def do_add_anime():
     name = pin.anime_name
-    ani  = AnimeInfo(name)
-    glb_anime_list.append(ani)
+    ani  = anime.AnimeInfo(name)
+    glb_ani_man.add(ani)
+    glb_ani_man.saveData()
     close_popup()
     home_page()
-
-
-class AnimeInfo:
-    def __init__(self, name):
-        self.name = name
-
