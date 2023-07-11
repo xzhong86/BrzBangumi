@@ -7,7 +7,7 @@ from pywebio.output import  *
 from pywebio.session import local as web_local
 
 from functools import partial
-#from more_itertools import batched
+from more_itertools import batched
 
 from utils import anime
 
@@ -30,14 +30,35 @@ def home_page():
     ])
     anime_list = glb_ani_man.animes
     ani_items = [ put_anime_brief(ani) for ani in anime_list ]
-    put_column(ani_items)
+    #put_column(ani_items)
+    put_column([
+        put_row(r) for r in batched(ani_items, 2)
+    ])
 
 def put_anime_brief(ani):
-    put_text(ani.name)
+    brief = put_row([
+        put_text("Picture"),
+        put_column([
+            put_text(ani.name),
+            put_text(f"bangumi.tv {ani.bgm_id}, mikan {ani.mk_id}"),
+            put_text("key words: " + ', '.join(ani.kwds)),
+        ]),
+        put_column([
+            put_button("Edit", onclick=lambda:toast("edit")),
+        ])
+    ], size="1fr 4fr 1fr")
+    style(brief, 'border: 1px solid; border-radius: 8px; padding: 5px; margin: 4px')
+    return brief
 
 def show_add_anime():
+    ani = anime.AnimeInfo("dummy")
+    ani_items = [
+        [attr.desc, put_input('anime_' + attr.key)] for attr in ani.attrs
+    ]
+    tbl_items = [ ["Item", "Detials" ] ]
+    tbl_items = tbl_items + ani_items
     items = put_column([
-        put_row([put_text("name"), put_input("anime_name")]),
+        put_table(tbl_items),
         put_button("Submit", onclick=do_add_anime)
     ])
     popup("Add Anime Information:",
@@ -45,8 +66,10 @@ def show_add_anime():
           size="normal")
 
 def do_add_anime():
-    name = pin.anime_name
-    ani  = anime.AnimeInfo(name)
+    ani = anime.AnimeInfo(pin.anime_name)
+    for item in ani.attr_keys:
+        ani.setAttr(item, pin['anime_' + item])
+
     glb_ani_man.add(ani)
     glb_ani_man.saveData()
     close_popup()
