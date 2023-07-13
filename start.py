@@ -12,5 +12,5 @@ try:
 
 except KeyboardInterrupt:
     print("User Interrupt, exit.")
-    anime.getManager().saveData()
+    anime.saveAllOpened()
     sys.exit(0)

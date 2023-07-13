@@ -44,7 +44,7 @@ def put_anime_brief(ani):
             put_text("key words: " + ', '.join(ani.kwds)),
         ]),
         put_column([
-            put_button("Edit", onclick=lambda:toast("edit")),
+            put_button("Edit", onclick=partial(show_edit_anime, ani)),
         ])
     ], size="1fr 4fr 1fr")
     style(brief, 'border: 1px solid; border-radius: 8px; padding: 5px; margin: 4px')
@@ -66,11 +66,35 @@ def show_add_anime():
           size="normal")
 
 def do_add_anime():
-    ani = anime.AnimeInfo(pin.anime_name)
+    ani = anime.AnimeInfo(pin.anime_name.strip())
     for item in ani.attr_keys:
         ani.setAttr(item, pin['anime_' + item])
 
     glb_ani_man.add(ani)
+    glb_ani_man.saveData()
+    close_popup()
+    home_page()
+
+def show_edit_anime(ani):
+    ani_items = []
+    for attr in ani.attrs:
+        item  = attr.key
+        value = getattr(ani, item)
+        ani_items.append([attr.desc, put_input('anime_' + attr.key, value=value)])
+    
+    tbl_items = [ ["Item", "Detials" ] ]
+    tbl_items = tbl_items + ani_items
+    items = put_column([
+        put_table(tbl_items),
+        put_button("Update", onclick=partial(do_update_anime, ani))
+    ])
+    popup("Edit Anime Information:", items,
+          size="normal")
+    
+def do_update_anime(ani):
+    for item in ani.attr_keys:
+        ani.setAttr(item, pin['anime_' + item])
+
     glb_ani_man.saveData()
     close_popup()
     home_page()
