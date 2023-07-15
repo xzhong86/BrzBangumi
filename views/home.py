@@ -75,13 +75,32 @@ def do_add_anime():
     close_popup()
     home_page()
 
+def put_season_select(ani):
+    from datetime import datetime
+    dt = datetime.now()
+    opts = []
+    for year in range(dt.year-3, dt.year+1):
+        opts = opts + [ f"{year}-Q{n}" for n in range(1, 5) ]
+    cur_season = int((dt.month - 1) / 3) + 1   # 1-4
+    for n in range(0, 4 - cur_season):
+        opts.pop()
+    opts.reverse()
+    if not ani.season or ani.season in opts:
+        return put_select("anime_season", options=opts[0:12], value=ani.season)
+    else:
+        return put_input("anime_season", value=ani.season, readonly=True)
+
 def show_edit_anime(ani):
     ani_items = []
     for attr in ani.attrs:
-        item  = attr.key
-        value = getattr(ani, item)
-        ani_items.append([attr.desc, put_input('anime_' + attr.key, value=value)])
-    
+        key  = attr.key
+        value = getattr(ani, key)
+        
+        if key == 'season':
+            ani_items.append([attr.desc, put_season_select(ani)])
+        else:
+            ani_items.append([attr.desc, put_input('anime_' + key, value=value)])
+
     tbl_items = [ ["Item", "Detials" ] ]
     tbl_items = tbl_items + ani_items
     items = put_column([

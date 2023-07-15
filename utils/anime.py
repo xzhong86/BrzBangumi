@@ -21,7 +21,7 @@ class AnimeInfo:
             Attr('bgm_id', 'bangumi.tv id', 0),
             Attr('mk_id',  'mikan id', 0),
             Attr('kwds',   'key words', []),
-            #Attr('season', 'seasom', ['2022', 'Q1'])
+            Attr('season', 'season', '2023-Q1')
         ]
         self.attr_keys = [ a.key for a in self.attrs ]
         self.attr_dict = { a.key : a for a in self.attrs }
@@ -32,22 +32,26 @@ class AnimeInfo:
         self.name = name
         self.hash_id = get_str_hash(name, 12)
 
-    def setAttr(self, name, value):
-        if getattr(self, name) == value:
-            return
-
+    def transAttrValue(self, name, value):
         atype = type(getattr(self, name))
         if atype == str:
-            setattr(self, name, value)
+            return value
         elif atype == int:
-            setattr(self, name, int(value))
+            return int(value)
         elif atype == list:
             if type(value) == str:
-                setattr(self, name, splitStr(value, ','))
+                return splitStr(value, ',')
             else:
-                setattr(self, name, value)
+                return value
         else:
             raise "bad type"
+
+    def setAttr(self, name, _value):
+        if getattr(self, name) == _value:
+            return
+
+        value = self.transAttrValue(name, _value)
+        setattr(self, name, value)
 
         if (name == 'name' and value):
             self.hash_id = get_str_hash(value, 12)
