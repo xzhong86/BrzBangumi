@@ -21,7 +21,7 @@ class AnimeInfo:
             Attr('bgm_id', 'bangumi.tv id', 0),
             Attr('mk_id',  'mikan id', 0),
             Attr('kwds',   'key words', []),
-            Attr('season', 'season', '2023-Q1')
+            Attr('season', 'season', '2023-Q3')
         ]
         self.attr_keys = [ a.key for a in self.attrs ]
         self.attr_dict = { a.key : a for a in self.attrs }
@@ -32,12 +32,14 @@ class AnimeInfo:
         self.name = name
         self.hash_id = get_str_hash(name, 12)
 
+        self.files = []
+
     def transAttrValue(self, name, value):
         atype = type(getattr(self, name))
         if atype == str:
             return value
         elif atype == int:
-            return int(value)
+            return int(value) if value else 0
         elif atype == list:
             if type(value) == str:
                 return splitStr(value, ',')
@@ -82,6 +84,13 @@ class AnimeManager:
 
     def add(self, ani):
         self.animes.append(ani)
+
+    def findAnimeById(self, hash_id):
+        for ani in self.animes:
+            if ani.hash_id == hash_id:
+                return ani
+
+        return None
 
     def saveData(self):
         udata = {}

@@ -8,7 +8,7 @@ def main():
     vhome.view()
 
 try:
-    pywebio.start_server(main, port=8091, debug=True)
+    pywebio.start_server(main, port=8091, debug=True, cdn=False)
 
 except KeyboardInterrupt:
     print("User Interrupt, exit.")
