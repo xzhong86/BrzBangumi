@@ -3,6 +3,7 @@ import os
 import sys
 import re
 from os.path import basename
+from datetime import datetime, timedelta
 
 import pywebio
 from pywebio.pin import  *
@@ -18,19 +19,30 @@ from views import home
 from utils import config
 from utils import anime
 
+class FileInfo:
+    def __init__(self, dirpath, filename):
+        self.path = os.path.join(dirpath, filename)
+        self.name = basename(filename)
+        st = os.stat(self.path)
+        self.time = datetime.fromtimestamp(st.st_mtime)
+
+    def isfile(self):
+        return os.path.isfile(self.path)
+
 def get_files(ddir):
     files = []
     print(f"scan dir {ddir} ...")
     for file in os.listdir(ddir):
-        path = os.path.join(ddir, file)
-        if os.path.isfile(path):
-            files.append(path)
+        fi = FileInfo(ddir, file)
+        if fi.isfile():
+            files.append(fi)
 
     re_ext = re.compile(r'.+\.(mp4|mkv)')
-    for file in files:
-        if not re_ext.match(file):
-            files.remove(file)
+    for fi in files:
+        if not re_ext.match(fi.name):
+            files.remove(fi)
 
+    files.sort(key=lambda fi: fi.time, reverse=True)
     return files
 
 def dist_files(am, files):
@@ -38,19 +50,26 @@ def dist_files(am, files):
     for ani in am.animes:
         ani.files = []  # clear
     res = OpenStruct(others=[], conflicts=[])
-    for file in files:
+    for fi in files:
         belong = []
         for ani in am.animes:
             for kw in ani.kwds:
-                if kw and kw in file:
-                    ani.files.append(file)
+                if kw and kw in fi.name:
+                    ani.files.append(fi)
                     belong.append(ani)
                     break
-        #print(f"file: {file}, belong={len(belong)}")
+        #print(f"file: {fi.name}, belong={len(belong)}")
         if len(belong) == 0:
-            res.others.append(file)
+            res.others.append(fi)
         if len(belong) > 1:
-            res.conflicts.append([file, belong])
+            res.conflicts.append([fi, belong])
+
+    for ani in am.animes:
+        if len(ani.files) > 0:
+            ani.update_time = ani.files[0].time
+        else:
+            ani.update_time = datetime.now() - timedelta(days=90)
+
     return res
 
 @use_scope('main', clear=True)
@@ -59,43 +78,41 @@ def downloaded_page():
     files = get_files(config.get().download_dir)
     res = dist_files(ani_man, files)
 
-    for ani in ani_man.animes:
+    animes = ani_man.animes.copy()
+    animes.sort(key=lambda a: a.update_time, reverse=True)
+    put_markdown("## Animes")
+    for ani in animes:
+        timestr = ani.update_time.strftime("%Y-%m-%d")
         put_column([
-            put_text(ani.name),
+            put_markdown(f"### {ani.name}"),
+            put_text(f"last update: {timestr}"),
             put_collapse(f"{len(ani.files)} files:",
-                         [ put_text(basename(f)) for f in ani.files ])
-        ], size="0.3fr 1fr")
+                         [ put_text(fi.name) for fi in ani.files ])
+        ], size="0.3fr 0.3fr 1fr")
 
     put_markdown("## Conflicts")
     for info in res.conflicts:
-        file, animes = info
-        put_markdown(" - " + file)
+        fi, animes = info
+        put_markdown(" - " + fi.name)
         for ani in animes:
             put_markdown("   - " + ani.name)
     
     put_markdown("## Others")
     file_items = []
-    for file in res.others:
-        fname = basename(file)
-        item = [ fname,
-                 put_button("Belong", onclick=partial(show_belong_pop, fname)) ]
+    for fi in res.others:
+        item = [ fi.time.strftime("%Y-%m-%d"), fi.name,
+                 put_button("Belong", onclick=partial(show_belong_pop, fi.name)) ]
         file_items.append(item)
 
-    put_table([[f"File ({len(file_items)})", "Action"]] + file_items)
+    put_table([["Time", f"File ({len(file_items)})", "Action"]] + file_items)
 
 
 def show_belong_pop(fname):
     am = anime.getManager(web_local.user)
 
     opts = [ dict(label=ani.name, value=ani.hash_id) for ani in am.animes ]
-    #edit_anime = anime_info.show_edit_anime
-    #ani_tbl = [["Anime", "Edit"]]
-    #ani_tbl += [
-    #    [ani.name, put_button("Edit", onclick=partial(edit_anime, ani))] for ani in ani_man.animes
-    #]
-    #pop_tbl = put_table(ani_tbl)
     web_local.cur_fname = fname
-    #add_anime = home.show_add_anime
+
     popup("Update Anime Keyword Info",
           [
               put_text(fname),
@@ -118,6 +135,7 @@ def do_belong_update():
     ani.kwds.append(keyword)
     am.saveData()
     close_popup()
+    downloaded_page()
 
 def do_add_anime():
     opts = dict(keyword = pin.anime_keyword,

@@ -49,6 +49,8 @@ def home_page():
     ])
 
 def put_anime_brief(ani):
+    edit_page = partial(anime_info.show_edit_anime,
+                        dict(anime=ani, callback=home_page))
     brief = put_row([
         put_text("Picture"),
         put_column([
@@ -57,7 +59,7 @@ def put_anime_brief(ani):
             put_text("key words: " + ', '.join(ani.kwds)),
         ]),
         put_column([
-            put_button("Edit", onclick=partial(anime_info.show_edit_anime, ani)),
+            put_button("Edit", onclick=edit_page),
         ])
     ], size="1fr 4fr 1fr")
     style(brief, 'border: 1px solid; border-radius: 8px; padding: 5px; margin: 4px')

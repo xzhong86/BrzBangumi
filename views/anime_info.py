@@ -23,7 +23,8 @@ def put_season_select(ani):
     else:
         return put_input("anime_season", value=ani.season, readonly=True)
 
-def show_edit_anime(ani):
+def show_edit_anime(opts):
+    ani = opts['anime']
     ani_items = []
     for attr in ani.attrs:
         key  = attr.key
@@ -38,18 +39,20 @@ def show_edit_anime(ani):
     tbl_items = tbl_items + ani_items
     items = put_column([
         put_table(tbl_items),
-        put_button("Update", onclick=partial(do_update_anime, ani))
+        put_button("Update", onclick=partial(do_update_anime, opts))
     ])
     popup("Edit Anime Information:", items,
           size="normal")
     
-def do_update_anime(ani):
+def do_update_anime(opts):
+    ani = opts['anime']
     for item in ani.attr_keys:
         ani.setAttr(item, pin['anime_' + item])
 
-    glb_ani_man.saveData()
+    am = anime.getManager(web_local.user)
+    am.saveData()
     close_popup()
-    home_page()
+    call_callback(opts)
 
 
 @use_scope("main", clear=True)
@@ -70,8 +73,9 @@ def add_anime(opts):
     am = anime.getManager(web_local.user)
     am.add(ani)
     am.saveData()
+    call_callback(opts)
 
-    if opts.get('callback'):
-        opts['callback']()
-    else:
-        home_page()
+def call_callback(opts, default = None):
+    cb = opts.get('callback') or default
+    if cb: cb()
+
