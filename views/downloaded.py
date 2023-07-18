@@ -1,10 +1,5 @@
 
 import os
-import sys
-import re
-from os.path import basename
-from datetime import datetime, timedelta
-
 import pywebio
 from pywebio.pin import  *
 from pywebio.input import  *
@@ -12,71 +7,17 @@ from pywebio.output import  *
 from pywebio.session import local as web_local
 
 from functools import partial
-from ostruct import OpenStruct
 
 from views import anime_info
 from views import home
-from utils import config
 from utils import anime
+from utils import file_manager
 
-class FileInfo:
-    def __init__(self, dirpath, filename):
-        self.path = os.path.join(dirpath, filename)
-        self.name = basename(filename)
-        st = os.stat(self.path)
-        self.time = datetime.fromtimestamp(st.st_mtime)
-
-    def isfile(self):
-        return os.path.isfile(self.path)
-
-def get_files(ddir):
-    files = []
-    print(f"scan dir {ddir} ...")
-    for file in os.listdir(ddir):
-        fi = FileInfo(ddir, file)
-        if fi.isfile():
-            files.append(fi)
-
-    re_ext = re.compile(r'.+\.(mp4|mkv)')
-    for fi in files:
-        if not re_ext.match(fi.name):
-            files.remove(fi)
-
-    files.sort(key=lambda fi: fi.time, reverse=True)
-    return files
-
-def dist_files(am, files):
-    print(f"{len(files)} to distribute...")
-    for ani in am.animes:
-        ani.files = []  # clear
-    res = OpenStruct(others=[], conflicts=[])
-    for fi in files:
-        belong = []
-        for ani in am.animes:
-            for kw in ani.kwds:
-                if kw and kw in fi.name:
-                    ani.files.append(fi)
-                    belong.append(ani)
-                    break
-        #print(f"file: {fi.name}, belong={len(belong)}")
-        if len(belong) == 0:
-            res.others.append(fi)
-        if len(belong) > 1:
-            res.conflicts.append([fi, belong])
-
-    for ani in am.animes:
-        if len(ani.files) > 0:
-            ani.update_time = ani.files[0].time
-        else:
-            ani.update_time = datetime.now() - timedelta(days=90)
-
-    return res
 
 @use_scope('main', clear=True)
 def downloaded_page():
     ani_man = anime.getManager(web_local.user)
-    files = get_files(config.get().download_dir)
-    res = dist_files(ani_man, files)
+    res = file_manager.scan_files(ani_man)
 
     animes = ani_man.animes.copy()
     animes.sort(key=lambda a: a.update_time, reverse=True)
