@@ -1,5 +1,9 @@
 
+import os
+import re
 import json
+
+from utils import backup
 
 class DataBase:
     def __init__(self, path, user):
@@ -19,6 +23,7 @@ class DataBase:
     def saveUserData(self, udata):
         data = self.all_data
         data[self.user] = udata
+        backup.check_and_backup()
         with open(self.file_path, 'w', encoding='utf-8') as fh:
             json.dump(data, fh, indent=4, sort_keys=True, ensure_ascii=False)
 
