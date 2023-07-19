@@ -10,17 +10,16 @@ import bs4
 import os
 import re
 
-import trackers
+from utils import config
+from utils import trackers
 
-UseCache = True
-CacheDir = "./cache/"
-Debug = False
 
 def getUrlContent(url):
+    cfg = config.get()
     md5str = hashlib.md5(url.encode()).hexdigest()
-    cache_file = os.path.join(CacheDir, md5str)
+    cache_file = os.path.join(cfg.cache_dir, md5str)
     effictive_time = 600
-    if (UseCache and os.path.isfile(cache_file)):
+    if (cfg.use_cache and os.path.isfile(cache_file)):
         mtime = os.path.getmtime(cache_file)
         fsize = os.path.getsize(cache_file)
         if (time.time() - mtime < effictive_time and fsize > 0):
@@ -32,12 +31,11 @@ def getUrlContent(url):
     req = requests.get(url)
     text = req.content
 
-    if (UseCache and req.status_code == 200):
+    if (cfg.use_cache and req.status_code == 200):
         print("write cache file: ", cache_file)
-        Path(CacheDir).mkdir(parents=True, exist_ok=True)
+        Path(cfg.cache_dir).mkdir(parents=True, exist_ok=True)
         with open(cache_file, 'wb') as fh:
             fh.write(text)
-            #fh.close()
 
     return text
 

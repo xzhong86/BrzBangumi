@@ -11,6 +11,7 @@ from more_itertools import batched
 
 from views import downloaded
 from views import anime_info
+from views import resource
 from utils import anime
 from utils import config
 
@@ -25,7 +26,8 @@ def view():
     global glb_ani_man
     user = config.get().user  # fixme
     web_local.user = user
-    glb_ani_man = anime.getManager(user)
+    web_local.ani_man = anime.getManager(user)
+    glb_ani_man = web_local.ani_man
     main_menu()
     home_page()
 
@@ -34,6 +36,7 @@ def main_menu():
     put_row([
         put_button("Home", home_page),
         put_button("Downloaded", downloaded.downloaded_page),
+        put_button("Resource", resource.resource_page)
     ])
 
 @use_scope("main", clear=True)

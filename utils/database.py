@@ -23,7 +23,7 @@ class DataBase:
     def saveUserData(self, udata):
         data = self.all_data
         data[self.user] = udata
-        backup.check_and_backup()
+        backup.check_and_backup(self.file_path)
         with open(self.file_path, 'w', encoding='utf-8') as fh:
             json.dump(data, fh, indent=4, sort_keys=True, ensure_ascii=False)
 

@@ -16,7 +16,7 @@ from utils import file_manager
 
 @use_scope('main', clear=True)
 def downloaded_page():
-    ani_man = anime.getManager(web_local.user)
+    ani_man = web_local.ani_man
     res = file_manager.scan_files(ani_man)
 
     animes = ani_man.animes.copy()
@@ -49,7 +49,7 @@ def downloaded_page():
 
 
 def show_belong_pop(fname):
-    am = anime.getManager(web_local.user)
+    am = web_local.ani_man
 
     opts = [ dict(label=ani.name, value=ani.hash_id) for ani in am.animes ]
     web_local.cur_fname = fname
@@ -71,7 +71,7 @@ def do_belong_update():
         toast("Bad keyword not in file name")
         return
 
-    am = anime.getManager(web_local.user)
+    am = web_local.ani_man
     ani = am.findAnimeById(hash_id)
     ani.kwds.append(keyword)
     am.saveData()
