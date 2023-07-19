@@ -21,7 +21,7 @@ def view():
     pywebio.session.set_env(output_max_width="80%")
 
     put_column([put_scope("menu"), None, put_scope("main")],
-               size="40px 0.3fr 13fr")
+               size="40px 10px auto")
 
     global glb_ani_man
     user = config.get().user  # fixme

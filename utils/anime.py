@@ -1,14 +1,25 @@
 
+import re
 import hashlib
 from utils import database
 from utils import config
-from utils.misc import splitStr
+from utils import misc
 
 def get_str_hash(_str, len = 8):
     hash_str = hashlib.md5(_str.encode('utf-8')).hexdigest()
     len = 16 if len > 16 else len
     len = 8  if len < 8  else len
     return hash_str[0:len]
+
+IndexPatterns = [ r'\[(\d\d)(v\d)?(集)?\]', r'\s(\d\d)(v\d)?\s*(\[|\()' ]
+IndexRePats  = [ re.compile(pat) for pat in IndexPatterns ]
+def guess_anime_index(string):
+    for re_pat in IndexRePats:
+        m = re_pat.search(string)
+        if m:
+            return m[1]  # return string
+    return None
+
 
 class Attr:
     def __init__(self, key, desc, default):
@@ -42,7 +53,7 @@ class AnimeInfo:
             return int(value) if value else 0
         elif atype == list:
             if type(value) == str:
-                return splitStr(value, ',')
+                return misc.splitStr(value, ',')
             else:
                 return value
         else:
@@ -57,6 +68,18 @@ class AnimeInfo:
 
         if (name == 'name' and value):
             self.hash_id = get_str_hash(value, 12)
+
+    def matchKeyWords(self, string):
+        for kw in self.kwds:
+            #if kw and kw in string:
+            #    return True
+            if misc.keywordMatch(kw, string):
+                return True
+
+        return False
+
+    def guessIndex(self, string):
+        return guess_anime_index(string)
 
     def getData(self):
         return { item : getattr(self, item) for item in self.attr_keys }
@@ -88,6 +111,13 @@ class AnimeManager:
     def findAnimeById(self, hash_id):
         for ani in self.animes:
             if ani.hash_id == hash_id:
+                return ani
+
+        return None
+
+    def findAnimeByKwds(self, string):
+        for ani in self.animes:
+            if ani.matchKeyWords(string):
                 return ani
 
         return None

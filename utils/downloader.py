@@ -21,7 +21,7 @@ class Downloader:
         cfg = DefaultConf.copy()
         if (conf):
             cfg.update(conf)
-        self.no_connect = True
+        self.no_connect = False
         self.cfg    = cfg
         if self.no_connect:
             return
@@ -77,6 +77,9 @@ class Downloader:
             #client.torrents_add(urls=url, category='acg',
             #                    save_path='/data/share/qbittorrent/')
 
+
+def get(cfg = None):
+    return Downloader(cfg)
 
 # standalone test
 if __name__ == '__main__':

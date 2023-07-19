@@ -13,9 +13,11 @@ class FileInfo:
         self.name = basename(filename)
         st = os.stat(self.path)
         self.time = datetime.fromtimestamp(st.st_mtime)
+        self.index = None
 
     def isfile(self):
         return os.path.isfile(self.path)
+
 
 def get_files(ddir):
     files = []
@@ -39,11 +41,11 @@ def dist_files(am, files):
     for fi in files:
         belong = []
         for ani in am.animes:
-            for kw in ani.kwds:
-                if kw and kw in fi.name:
-                    ani.files.append(fi)
-                    belong.append(ani)
-                    break
+            if ani.matchKeyWords(fi.name):
+                fi.index = ani.guessIndex(fi.name)
+                ani.files.append(fi)
+                belong.append(ani)
+                break
         #print(f"file: {fi.name}, belong={len(belong)}")
         if len(belong) == 0:
             res.others.append(fi)
