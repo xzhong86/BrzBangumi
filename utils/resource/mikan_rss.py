@@ -115,8 +115,10 @@ def getDlListUrl(url):
 
     return lst
 
-def getList():
+def getList(index = 1):
     rss_url = "https://mikanani.me/RSS/Classic"
+    if index > 1 and index < 3000:
+        rss_url = f"{rss_url}/{str(index)}"
     return getDlListUrl(rss_url)
 
 def doTest():

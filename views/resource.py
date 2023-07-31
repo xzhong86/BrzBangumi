@@ -22,6 +22,16 @@ def do_download(info):
     glb_downloader.download(info.magnet)
     toast(f"download: {info.title}")
 
+def show_file_list(ani):
+    def time_str(dt):
+        return dt.strftime("%y-%m-%d %H:%M")
+
+    tbl = put_table([[ "time", "file" ]] +
+                    [ [ time_str(fi.time) , fi.name] for fi in ani.files ])
+
+    popup("Downloaded Files", [ tbl ], size="large")
+    return
+
 def show_download_list(dl_lst, am):
     info_list = []
     for info in dl_lst:
@@ -35,15 +45,21 @@ def show_download_list(dl_lst, am):
 
     web_items = []
     for ani, grp_lst in itertools.groupby(info_list, lambda i: i.anime):
-        max_idx = max([fi.index for fi in ani.files])
-        cols = [ put_text(f"{ani.name} - {max_idx}") ]
+        #max_idx = max([fi.index for fi in ani.files]) if len(ani.files) > 0 else 0
+        idx_lst = ",".join([ str(fi.index) for fi in ani.files ])
+        cols = [ ]
+        cols.append(put_row([
+            put_text(f"{ani.name} - {idx_lst}"),
+            None,
+            put_button("list", onclick=partial(show_file_list, ani), small=True),
+        ], size="auto auto auto"))
         for info in grp_lst:
             size = naturalsize(info.download.length, binary=True)
             cols.append(put_row([
-                put_text(f"{info.title} ({size})"),
+                put_button("Download", onclick=partial(do_download, info), small=True),
                 None,
-                put_button("Download", onclick=partial(do_download, info), small=True)
-            ], size="auto 10px 1fr"))
+                put_text(f"{size} {info.title}"),
+            ], size="80px 10px auto"))
         content = put_column(cols)
         style(content, 'border: 1px solid; border-radius: 8px; padding: 4px; margin: 3px')
         web_items.append(content)

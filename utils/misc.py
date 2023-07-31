@@ -27,3 +27,7 @@ def keywordMatch(kw, string):
 
     rat = difflib.SequenceMatcher(None, kw, str2).ratio()
     return rat > 0.9
+
+def ostruct2dict(st):
+    return { k:v for k,v in st.items() }
+

@@ -46,7 +46,7 @@ def clean_backup_files(files):
     if len(files) < 8:
         return
     
-    for fi in files[0, len(files) - 8]:
+    for fi in files[0: len(files) - 8]:
         os.unlink(fi.path)
 
 
