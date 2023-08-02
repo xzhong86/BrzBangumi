@@ -12,37 +12,14 @@ import re
 
 from utils import config
 from utils import trackers
+from utils import cache
 
 
-def getUrlContent(url):
-    cfg = config.get()
-    md5str = hashlib.md5(url.encode()).hexdigest()
-    cache_file = os.path.join(cfg.cache_dir, md5str)
-    effictive_time = 600
-    if (cfg.use_cache and os.path.isfile(cache_file)):
-        mtime = os.path.getmtime(cache_file)
-        fsize = os.path.getsize(cache_file)
-        if (time.time() - mtime < effictive_time and fsize > 0):
-            print("read from cache: ", cache_file)
-            content = Path(cache_file).read_text()
-            return content
-
-    print("read url: ", url)
-    req = requests.get(url)
-    text = req.content
-
-    if (cfg.use_cache and req.status_code == 200):
-        print("write cache file: ", cache_file)
-        Path(cfg.cache_dir).mkdir(parents=True, exist_ok=True)
-        with open(cache_file, 'wb') as fh:
-            fh.write(text)
-
-    return text
-
-
-def getRss(url):
+def getRss(url, use_cache=False):
     try:
-        text   = getUrlContent(url)
+        text   = cache.getUrlContent(url, None if use_cache else 600)
+        if not text:
+            return None
         soup   = bs4.BeautifulSoup(text, "xml")
         items  = soup.channel.findAll('item', recursive=False)
         rss    = OpenStruct(soup=soup, items=items)
@@ -53,7 +30,7 @@ def getRss(url):
 
     except Exception as e:
         print("Exception when get RSS: ", e)
-        raise(e)
+        return None
 
 def dumpRss(rss):
     dump_num = 5
@@ -91,9 +68,11 @@ def findHashId(info, item):
         res = getid(item.link)
     return res
 
-def getDlListUrl(url):
-    rss = getRss(url)
+def getDlListUrl(url, read_cache=False):
+    rss = getRss(url, read_cache)
     lst = []
+    if not rss:
+        return None
     for item in rss.items:
         info = OpenStruct()
         info.title = item.title.text
@@ -115,11 +94,18 @@ def getDlListUrl(url):
 
     return lst
 
-def getList(index = 1):
-    rss_url = "https://mikanani.me/RSS/Classic"
-    if index > 1 and index < 3000:
-        rss_url = f"{rss_url}/{str(index)}"
-    return getDlListUrl(rss_url)
+def getList(npage=1, read_cache=False):
+    lst = []
+    rss_base = "https://mikanani.me/RSS/Classic"
+    for index in range(1, npage+1):
+        rss_url = f"{rss_base}/{str(index)}"
+        res = getDlListUrl(rss_url, read_cache)
+        if not res:
+            return None
+        lst = lst + res
+
+    return lst
+
 
 def doTest():
     print("doTest")

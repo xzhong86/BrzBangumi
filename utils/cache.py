@@ -35,6 +35,7 @@ def getUrlContent(url, effective_time = 600):
 
     if req.status_code != 200:
         print(f"bad response code: {req.status_code} for {url}")
+        return None
 
     return text
 

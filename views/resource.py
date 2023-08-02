@@ -44,6 +44,7 @@ def show_download_list(dl_lst, am):
                 info_list.append(info)
 
     web_items = []
+    info_list.sort(key=lambda i: i.anime.name)
     for ani, grp_lst in itertools.groupby(info_list, lambda i: i.anime):
         #max_idx = max([fi.index for fi in ani.files]) if len(ani.files) > 0 else 0
         idx_lst = ",".join([ str(fi.index) for fi in ani.files ])
@@ -66,32 +67,26 @@ def show_download_list(dl_lst, am):
 
     put_column(web_items, size=" ".join(["auto" for n in web_items]))
 
+
+def get_dl_list():
+    lst = mikan_rss.getList(npage=2)
+    if not lst:
+        toast("failed, read from cache")
+        lst = mikan_rss.getList(npage=2, read_cache=True)
+
+    return lst
+
 @use_scope("main", clear=True)
 def resource_page():
     am = web_local.ani_man
     res = file_manager.scan_files(am)
-    dl_lst = mikan_rss.getList()
+    dl_lst = get_dl_list()
+
+    if not dl_lst:
+        put_error("Get Download resource failed.")
+        return
 
     items = []
-    #for info in dl_lst:
-    #    ani = am.findAnimeByKwds(info.title)
-    #    if ani:
-    #        files_idx = [ fi.index for fi in ani.files ]
-    #        ani_idx = ani.guessIndex(info.title) or "XX"
-    #        if ani_idx not in files_idx:
-    #            content = put_column([
-    #                put_row([
-    #                    put_text(f"{ani.name} - {ani_idx}"),
-    #                    put_button("Download", onclick=partial(do_download, info))
-    #                      .style("float: right; width: 100px;")
-    #                ]),
-    #                put_text(info.title)
-    #            ], size="auto auto")
-    #            style(content, 'border: 1px solid; border-radius: 8px; padding: 4px; margin: 3px')
-    #            items.append(content)
-    # 
-    #put_column(items, size=' '.join(['auto' for x in items]))
-    #items = []
     show_download_list(dl_lst, am)
 
     put_markdown("## Others")
