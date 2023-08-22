@@ -4,5 +4,5 @@ export PYTHONPATH=.
 
 . env/bin/activate
 
-python3 start.py $*
+python3 app-bangumi.py $*
 
