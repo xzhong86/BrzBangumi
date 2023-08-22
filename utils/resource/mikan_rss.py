@@ -15,7 +15,7 @@ from utils import trackers
 from utils import cache
 
 
-def getRss(url, use_cache=False):
+def getRssInfo(url, use_cache=False):
     try:
         text   = cache.getUrlContent(url, None if use_cache else 600)
         if not text:
@@ -41,64 +41,64 @@ def dumpRss(rss):
         #print(list(filter(lambda s: s[0] != '_', dir(item))))
 
 def strToTime(dstr):
-    try:
-        dt = datetime.datetime.fromisoformat(dstr)
-        return dt.timestamp()
-    except:
-        pass
-
-    try:
-        dt = datetime.strptime(dstr, "%Y-%m-%dT%H:%M:%S.%f")
-        return dt.timestamp()
-    except:
-        pass
-
-    return time.time()
-
+    def trySafe(dstr, fn):
+        try: return fn(dstr)
+        except: pass
+        return None
+    dt =       trySafe(dstr, lambda s: datetime.datetime.fromisoformat(s))
+    dt = dt or trySafe(dstr, lambda s: datetime.strptime(s, "%Y-%m-%dT%H:%M:%S.%f"))
+    return dt and dt.timestamp() or time.time()
 
 def findHashId(info, item):
     regex = re.compile('([0-9a-f]{32,})')
     def getid(url, regex=regex):
         m = regex.search(url)
         return m and m[1]
-    res = None
-    if (info.download):
-        res = getid(info.download.url)
-    if (not res and item.link):
-        res = getid(item.link)
-    return res
+    return info.link and getid(info.link)
+
+def getDlInfo(item):   # rss item
+    info = OpenStruct()
+    info.title = item.title.text
+    info.link  = item.link.text
+    info.pdate = item.pubDate.text
+
+    enclosure  = item.find('enclosure')
+    info.length = int((item.contentLength and item.contentLength.text)
+                      or (enclosure and enclosure.get('length'))
+                      or '100000000')
+
+    if not info.link and enclosure:
+        info.link = enclosure.get('url')
+
+    if not info.pdate:
+        info.pdate = datetime.now().isoformat()
+
+    return info
 
 def getDlListUrl(url, read_cache=False):
-    rss = getRss(url, read_cache)
-    lst = []
+    rss = getRssInfo(url, read_cache)
     if not rss:
         return None
+
+    lst = []
     for item in rss.items:
-        info = OpenStruct()
-        info.title = item.title.text
-        info.link  = item.link.text
-        info.pdate = item.pubDate.text
-        info.time  = strToTime(info.pdate)
-
-        enclosure  = item.find('enclosure')
-        if (enclosure):
-            dl = OpenStruct()
-            dl.dtype  = enclosure.get('type')
-            dl.length = int(enclosure.get('length'))
-            dl.url    = enclosure.get('url')
-            info.download = dl
-            lst.append(info)
-
+        info = getDlInfo(item)
         info.hashid = findHashId(info, item)
-        info.magnet = trackers.getMagnet(info.hashid, 'mikan')
+
+        if info.hashid:
+            info.magnet = trackers.getMagnet(info.hashid, 'mikan')
+            lst.append(info)
 
     return lst
 
+def getRssUrl(index=1):
+    rss_base = "https://mikanani.me/RSS/Classic"
+    return f"{rss_base}/{str(index)}"
+
 def getList(npage=1, read_cache=False):
     lst = []
-    rss_base = "https://mikanani.me/RSS/Classic"
     for index in range(1, npage+1):
-        rss_url = f"{rss_base}/{str(index)}"
+        rss_url = getRssUrl(index)
         res = getDlListUrl(rss_url, read_cache)
         if not res:
             return None
@@ -106,11 +106,25 @@ def getList(npage=1, read_cache=False):
 
     return lst
 
+def saveDataList(dlist, fname):
+    def toDict(info):
+        return dict(title=info.title, )
+    
+
+def getListDay(nday=2, read_cache=False):
+    lst = []
+    for index in range(1, npage+1):
+        rss_url = getRssUrl(index)
+        res = getDlListUrl(rss_url, read_cache)
+        if not res:
+            return None
+        lst = lst + res
+
+    return lst
 
 def doTest():
     print("doTest")
-    rss_url = "https://mikanani.me/RSS/Classic"
-    rss = getRss(rss_url)
+    rss = getRssInfo(getRssUrl(1))
     dumpRss(rss)
 
 

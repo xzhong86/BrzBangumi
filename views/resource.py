@@ -55,7 +55,7 @@ def show_download_list(dl_lst, am):
             put_button("list", onclick=partial(show_file_list, ani), small=True),
         ], size="auto auto auto"))
         for info in grp_lst:
-            size = naturalsize(info.download.length, binary=True)
+            size = naturalsize(info.length, binary=True)
             cols.append(put_row([
                 put_button("Download", onclick=partial(do_download, info), small=True),
                 None,
@@ -91,7 +91,7 @@ def resource_page():
 
     put_markdown("## Others")
     for info in dl_lst:
-        size = naturalsize(info.download.length, binary=True)
+        size = naturalsize(info.length, binary=True)
         ani = am.findAnimeByKwds(info.title)
         if not ani:
             ani_name = ani.name if ani else "unknown"
