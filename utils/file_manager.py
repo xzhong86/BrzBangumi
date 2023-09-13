@@ -74,8 +74,12 @@ def copy_files(ani_man):
         ani_dir  = os.path.join(ani_root, dir_name)
         os.makedirs(ani_dir, exist_ok=True)
         for fi in ani.files:
-            print(f"copy {fi.path} into {ani_dir}")
-            shutil.copy2(fi.path, ani_dir)
+            dst = os.path.join(ani_dir, fi.name)
+            if os.path.exists(dst):
+                print(f"skip {fi.name}")
+            else:
+                print(f"copy {fi.path} into {ani_dir}")
+                shutil.copy2(fi.path, ani_dir)
 
     return
 

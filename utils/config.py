@@ -7,6 +7,7 @@ class Config:
         self.anime_dir = "/data/share/anime"
         self.use_cache = True
         self.cache_dir = "./cache"
+        self.do_test = False
 
 
 config = Config()
