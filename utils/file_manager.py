@@ -64,3 +64,18 @@ def scan_files(ani_man):
     files = get_files(config.get().download_dir)
     res = dist_files(ani_man, files)
     return res
+
+def copy_files(ani_man):
+    ani_root = config.get().anime_dir
+    os.makedirs(ani_root, exist_ok=True)
+    import shutil
+    for ani in ani_man.animes:
+        dir_name = ani.season + "-" + ani.name
+        ani_dir  = os.path.join(ani_root, dir_name)
+        os.makedirs(ani_dir, exist_ok=True)
+        for fi in ani.files:
+            print(f"copy {fi.path} into {ani_dir}")
+            shutil.copy2(fi.path, ani_dir)
+
+    return
+
