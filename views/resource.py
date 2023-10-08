@@ -69,11 +69,7 @@ def show_download_list(dl_lst, am):
 
 
 def get_dl_list():
-    lst = mikan_rss.getList(npage=2)
-    if not lst:
-        toast("failed, read from cache")
-        lst = mikan_rss.getList(npage=2, read_cache=True)
-
+    lst = mikan_rss.getList(nday=2)
     return lst
 
 @use_scope("main", clear=True)
@@ -99,7 +95,7 @@ def resource_page():
             tab = put_table([
                 ["Item", "Value"],
                 ["title", info.title],
-                ["info", f"{info.pdate}, {size}"],
+                ["info", f"{info.pubdate}, {size}"],
                 ["link", info.link],
                 #["download url", info.download.url],
                 ["anime", ani_name + " - " + str(ani_idx) ]

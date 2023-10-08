@@ -4,6 +4,7 @@ import re
 import json
 
 from utils import backup
+from utils import misc
 
 class DataBase:
     def __init__(self, path, user):
@@ -13,9 +14,8 @@ class DataBase:
         self.readJson()
 
     def readJson(self):
-        with open(self.file_path, 'r', encoding='utf-8') as fh:
-            self.all_data  = json.load(fh)
-            self.user_data = self.all_data.get(self.user) or {}
+        self.all_data  = misc.load_json(self.file_path)
+        self.user_data = self.all_data.get(self.user) or {}
 
     def getUserData(self):
         return self.user_data
@@ -24,8 +24,7 @@ class DataBase:
         data = self.all_data
         data[self.user] = udata
         backup.check_and_backup(self.file_path)
-        with open(self.file_path, 'w', encoding='utf-8') as fh:
-            json.dump(data, fh, indent=4, sort_keys=True, ensure_ascii=False)
+        misc.dump_json(self.file_path, data)
 
 
 def init(datafile, user):

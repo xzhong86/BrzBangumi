@@ -13,6 +13,7 @@ import re
 from utils import config
 from utils import trackers
 from utils import cache
+from utils import LinkList
 
 
 def getRssInfo(url, use_cache=False):
@@ -95,7 +96,7 @@ def getRssUrl(index=1):
     rss_base = "https://mikanani.me/RSS/Classic"
     return f"{rss_base}/{str(index)}"
 
-def getList(npage=1, read_cache=False):
+def getListRss(npage=1, read_cache=False):
     lst = []
     for index in range(1, npage+1):
         rss_url = getRssUrl(index)
@@ -106,21 +107,13 @@ def getList(npage=1, read_cache=False):
 
     return lst
 
-def saveDataList(dlist, fname):
-    def toDict(info):
-        return dict(title=info.title, )
-    
-
-def getListDay(nday=2, read_cache=False):
-    lst = []
-    for index in range(1, npage+1):
-        rss_url = getRssUrl(index)
-        res = getDlListUrl(rss_url, read_cache)
-        if not res:
-            return None
-        lst = lst + res
-
-    return lst
+def getList(nday=3):
+    linklist = LinkList.LinkList()
+    lst = getListRss(npage=2)
+    if lst:
+        links = [ LinkList.LinkInfo(e) for e in lst ]
+        linklist.mergeLinks(links)
+    return linklist.getList(nday)
 
 def doTest():
     print("doTest")

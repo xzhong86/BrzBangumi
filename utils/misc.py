@@ -1,6 +1,7 @@
 
 import re
 import difflib
+import json
 
 def splitStr(istr, sep):
     re_spc = re.compile(r'\s+')
@@ -30,4 +31,13 @@ def keywordMatch(kw, string):
 
 def ostruct2dict(st):
     return { k:v for k,v in st.items() }
+
+
+def load_json(filepath):
+    with open(filepath, 'r', encoding='utf-8') as fh:
+        return json.load(fh)
+
+def dump_json(filepath, obj):
+    with open(filepath, 'w', encoding='utf-8') as fh:
+        json.dump(obj, fh, indent=4, sort_keys=True, ensure_ascii=False)
 
