@@ -8,6 +8,7 @@ from datetime import datetime, timedelta
 
 from utils import config
 from utils import misc
+from utils import backup
 
 def strToTime(dstr):
     def trySafe(dstr, fn):
@@ -88,8 +89,9 @@ class LinkList:
             dt    = datetime.fromisoformat(glst[0].pubdate)
             path  = self.getDataFilePath(dt)
             links = [ e.to_dict() for e in glst ]
+            backup.check_and_backup(path, 4)
             misc.dump_json(path, links)
-            
+
 
     def mergeLinks(self, links):
         links.sort(key=lambda e: e.pubdate)

@@ -17,7 +17,7 @@ class FileInfo:
             return fh.read()
 
 
-def check_and_backup(filepath):
+def check_and_backup(filepath, maxkeep=8):
     dirpath  = os.path.dirname(filepath) or "."
     filename = os.path.basename(filepath)
     fi_curr   = FileInfo(dirpath, filename)
@@ -30,9 +30,9 @@ def check_and_backup(filepath):
             files.append(FileInfo(dirpath, fname))
 
     files.sort(key=lambda fi: fi.mtime)
-    fi_latest = files[-1]
+    fi_latest = files[-1] if len(files) > 0 else None
 
-    if filecmp.cmp(fi_curr.path, fi_latest.path, False):
+    if fi_latest and filecmp.cmp(fi_curr.path, fi_latest.path, False):
         return    # nothing new
 
     time_str  = datetime.now().strftime("%m-%d-%H")
@@ -40,13 +40,13 @@ def check_and_backup(filepath):
     shutil.copyfile(filepath, os.path.join(dirpath, bak_fname))
 
     files.append(FileInfo(dirpath, bak_fname))
-    clean_backup_files(files)
+    clean_backup_files(files, maxkeep)
 
-def clean_backup_files(files):
-    if len(files) < 8:
+def clean_backup_files(files, maxkeep):
+    if len(files) < maxkeep:
         return
     
-    for fi in files[0: len(files) - 8]:
+    for fi in files[0: len(files) - maxkeep]:
         os.unlink(fi.path)
 
 
