@@ -1,5 +1,7 @@
 #!/bin/sh
 
+. $HOME/set-proxy.sh
+
 export PYTHONPATH=.
 
 . env/bin/activate

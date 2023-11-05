@@ -2,6 +2,7 @@
 #from rss_parser import Parser
 from pathlib import Path
 from ostruct import OpenStruct
+
 import requests
 import datetime
 import hashlib
@@ -114,6 +115,7 @@ def getList(nday=3):
         links = [ LinkList.LinkInfo(e) for e in lst ]
         linklist.mergeLinks(links)
     return linklist.getList(nday)
+
 
 def doTest():
     print("doTest")
